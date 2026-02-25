@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const request = axios.create({
-  baseURL: '/api',
+  baseURL: 'https://server-nyw1.vercel.app/api',
   timeout: 10000
 })
 

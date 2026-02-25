@@ -2,7 +2,7 @@ import axios from 'axios'
 import { Toast, Notify } from 'vant'
 
 const request = axios.create({
-  baseURL: '/api',
+  baseURL: 'https://server-nyw1.vercel.app/api',
   timeout: 10000
 })
 
