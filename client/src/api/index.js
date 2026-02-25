@@ -2,7 +2,7 @@ import axios from 'axios'
 import { Toast, Notify } from 'vant'
 
 const request = axios.create({
-  baseURL: 'http://localhost:3001/api',
+  baseURL: 'https://nanyang-backend-production.up.railway.app/api',
   timeout: 10000
 })
 
