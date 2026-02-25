@@ -38,7 +38,7 @@
         <el-table-column prop="createTime" label="创建时间" />
         <el-table-column label="操作" width="150">
           <template #default="{ row }">
-            <el-button size="small" type="primary" link @click="handleException(row)">处理</el-button>
+            <el-button size="small" type="primary" link @click="handleExceptionAction(row)">处理</el-button>
             <el-button size="small" type="success" link @click="viewDetail(row)">详情</el-button>
           </template>
         </el-table-column>
@@ -68,18 +68,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { getExceptions, handleException } from '../api'
 
 const filterType = ref('')
 const dialogVisible = ref(false)
 const currentItem = ref({})
-
-const tableData = ref([
-  { id: 1, orderNo: 'ORD202602250001', type: 'damage', warehouse: '泰国仓', merchant: '商家A', description: '商品外包装破损', status: 'pending', createTime: '2026-02-25 10:30' },
-  { id: 2, orderNo: 'ORD202602250002', type: 'missing', warehouse: '马来仓', merchant: '商家B', description: '少货2件', status: 'pending', createTime: '2026-02-25 11:00' },
-  { id: 3, orderNo: 'ORD202602240015', type: 'wrong', warehouse: '越南仓', merchant: '商家C', description: '商品规格发错', status: 'resolved', createTime: '2026-02-24 15:20' }
-])
+const tableData = ref([])
 
 const getTypeName = (type) => {
   const names = { damage: '破损', missing: '少货', wrong: '错发', lost: '丢失' }
@@ -91,7 +87,16 @@ const getTypeColor = (type) => {
   return colors[type] || 'info'
 }
 
-const handleException = (row) => {
+const loadData = async () => {
+  try {
+    const res = await getExceptions()
+    tableData.value = res.data
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const handleExceptionAction = (row) => {
   currentItem.value = { ...row, handleType: 'resend', remark: '' }
   dialogVisible.value = true
 }
@@ -100,10 +105,24 @@ const viewDetail = (row) => {
   ElMessage.info('查看异常件详情: ' + row.orderNo)
 }
 
-const submitHandle = () => {
-  ElMessage.success('处理成功')
-  dialogVisible.value = false
+const submitHandle = async () => {
+  try {
+    await handleException({
+      id: currentItem.value.id,
+      handleType: currentItem.value.handleType,
+      remark: currentItem.value.remark
+    })
+    ElMessage.success('处理成功')
+    dialogVisible.value = false
+    loadData() // 刷新列表
+  } catch (e) {
+    ElMessage.error('处理失败')
+  }
 }
+
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped>
